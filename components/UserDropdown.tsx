@@ -28,7 +28,7 @@ const UserDropdown = () => {
             <DropdownMenuTrigger asChild>
                 <Button variant= "ghost" className="flex items=center gap-3 text-gray-4 hover:text-yellow-500">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src="public/assets/icons/avatar.svg" />
+                        <AvatarImage src="/assets/icons/avatar.svg" />
                         <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
                             {user.name[0]}
                         </AvatarFallback>
@@ -44,7 +44,7 @@ const UserDropdown = () => {
                 <DropdownMenuLabel>
                     <div className="flex relative items-center gap-3 py-2">
                         <Avatar className="h-10 w-10">
-                            <AvatarImage src="public/assets/icons/avatar.svg" />
+                            <AvatarImage src="/assets/icons/avatar.svg" alt="Avatar"/>
                             <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
                                 {user.name[0]}
                             </AvatarFallback>
