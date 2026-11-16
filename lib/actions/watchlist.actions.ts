@@ -64,6 +64,7 @@ export async function addToWatchlist(symbolInput: string, companyInput: string) 
             { upsert: true },
         );
         revalidatePath("/watchlist");
+        revalidatePath("/stocks/[symbol]", "page");
         return { success: true as const };
     } catch {
         return { success: false as const, error: "Could not save this stock. Please sign in and try again." };
@@ -76,6 +77,7 @@ export async function removeFromWatchlist(symbolInput: string) {
         const symbol = normalizeSymbol(symbolInput);
         await collection.deleteOne({ _id: `${userId}:${symbol}`, userId });
         revalidatePath("/watchlist");
+        revalidatePath("/stocks/[symbol]", "page");
         return { success: true as const };
     } catch {
         return { success: false as const, error: "Could not remove this stock. Please try again." };

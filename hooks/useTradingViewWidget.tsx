@@ -1,8 +1,8 @@
 'use client'
-import {RefObject, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 
 const useTradingViewWidget = (scriptUrl: string, config: Record<string, unknown>, height = 600) => {
-    const containerRef: RefObject<HTMLElement | null> = useRef<HTMLElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(
 
