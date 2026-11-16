@@ -2,8 +2,31 @@
 
 import { POPULAR_STOCK_SYMBOLS } from "@/lib/constants";
 import { getDateRange } from "@/lib/utils";
+import type { StockSnapshot } from "@/lib/watchlist";
 
 type CompanyProfile = { name?: string; exchange?: string };
+
+export async function getStockSnapshot(symbol: string): Promise<StockSnapshot> {
+    if (typeof symbol !== "string" || !/^[A-Za-z0-9.^:=/-]{1,40}$/.test(symbol)) throw new Error("Invalid stock symbol.");
+    const [quoteResult, profileResult] = await Promise.allSettled([
+        requestFinnhub<{ c?: number; d?: number; dp?: number; t?: number }>("quote", { symbol }, 60),
+        requestFinnhub<{ marketCapitalization?: number; currency?: string }>("stock/profile2", { symbol }, 3600),
+    ]);
+    const quote = quoteResult.status === "fulfilled" ? quoteResult.value : null;
+    const profile = profileResult.status === "fulfilled" ? profileResult.value : null;
+    const numberOrNull = (value: unknown): number | null => typeof value === "number" && Number.isFinite(value) ? value : null;
+    const price = numberOrNull(quote?.c);
+    const hasQuote = price !== null && price > 0 && !!quote?.t;
+    const cap = numberOrNull(profile?.marketCapitalization);
+    return {
+        price: hasQuote ? price : null,
+        change: hasQuote ? numberOrNull(quote?.d) : null,
+        changePercent: hasQuote ? numberOrNull(quote?.dp) : null,
+        marketCap: cap !== null && cap > 0 ? cap * 1_000_000 : null,
+        currency: typeof profile?.currency === "string" && /^[A-Z]{3}$/.test(profile.currency) ? profile.currency : null,
+        quotedAt: hasQuote ? numberOrNull(quote?.t) : null,
+    };
+}
 
 async function requestFinnhub<T>(path: string, params: Record<string, string>, ttl: number): Promise<T> {
     const token = process.env.FINNHUB_API_KEY || process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
@@ -21,7 +44,7 @@ async function requestFinnhub<T>(path: string, params: Record<string, string>, t
 
 async function loadPreview(): Promise<StockWithWatchlistStatus[]> {
     const profiles = await Promise.allSettled(
-        POPULAR_STOCK_SYMBOLS.slice(0, 3).map(async symbol => {
+        POPULAR_STOCK_SYMBOLS.slice(0, 5).map(async symbol => {
             const profile = await requestFinnhub<CompanyProfile>("stock/profile2", { symbol }, 3600);
             if (!profile.name?.trim()) return null;
             return { symbol, name: profile.name.trim(), exchange: profile.exchange || "Exchange unavailable", type: "Stock", isInWatchlist: false };
@@ -62,6 +85,36 @@ function prepareNews(articles: RawNewsArticle[], symbol?: string): MarketNewsArt
             image: article.image || "",
         }];
     }).sort((a, b) => b.datetime - a.datetime);
+}
+
+export async function getWatchlistNews(symbols: string[]): Promise<{ articles: MarketNewsArticle[]; unavailable: boolean }> {
+    const tickers = [...new Set(symbols.filter(symbol => typeof symbol === "string")
+        .map(symbol => symbol.trim().toUpperCase())
+        .filter(symbol => /^[A-Z0-9.^:=/-]{1,40}$/.test(symbol)))];
+    const range = getDateRange(5);
+    const articlesByUrl = new Map<string, MarketNewsArticle>();
+    let unavailable = false;
+    for (let index = 0; index < tickers.length; index += 4) {
+        const results = await Promise.allSettled(tickers.slice(index, index + 4).map(async symbol => {
+            const data = await requestFinnhub<RawNewsArticle[]>("company-news", { symbol, ...range }, 300);
+            if (!Array.isArray(data)) throw new Error("Invalid news response.");
+            return prepareNews(data, symbol);
+        }));
+        for (const result of results) {
+            if (result.status === "rejected") { unavailable = true; continue; }
+            for (const article of result.value) {
+                try {
+                    const url = new URL(article.url);
+                    if (url.protocol !== "https:" && url.protocol !== "http:") continue;
+                } catch { continue; }
+                const previous = articlesByUrl.get(article.url);
+                if (previous) {
+                    previous.related = [...new Set([...previous.related.split(","), article.related])].join(",");
+                } else articlesByUrl.set(article.url, { ...article });
+            }
+        }
+    }
+    return { articles: [...articlesByUrl.values()].sort((a, b) => b.datetime - a.datetime).slice(0, 12), unavailable };
 }
 
 export async function getNews(symbols: string[] = []): Promise<MarketNewsArticle[]> {

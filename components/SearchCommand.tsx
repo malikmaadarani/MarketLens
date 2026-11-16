@@ -25,7 +25,7 @@ export default function SearchCommand({ initialStocks, renderAs = "button", labe
     const query = searchTerm.trim();
     const loading = !!query && result?.query !== query;
     const failed = !!query && result?.query === query && result.failed;
-    const stocks = query ? result?.query === query ? result.stocks : [] : initialStocks.slice(0, 3);
+    const stocks = query ? result?.query === query ? result.stocks : [] : initialStocks.slice(0, 5);
 
     useEffect(() => {
         const onShortcut = (event: KeyboardEvent) => {

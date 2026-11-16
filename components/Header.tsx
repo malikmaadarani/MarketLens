@@ -6,7 +6,7 @@ import SearchCommand from "@/components/SearchCommand";
 import { searchStocks } from "@/lib/actions/finnhub.actions";
 
 const Header = async ({user}: {user: User}) => {
-    const initialStocks = (await searchStocks()).slice(0, 3);
+    const initialStocks = (await searchStocks()).slice(0, 5);
 
     return (
         <header className="sticky top-0 header">

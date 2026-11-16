@@ -7,7 +7,7 @@ import {
     TOP_STORIES_WIDGET_CONFIG
 } from "@/lib/constants";
 
-const Home: () => Element = () => {
+const Home = () => {
     const scritUrl = 'https://s3.tradingview.com/external-embedding/embed-widget-'
     return (
       <div className="flex min-h-screen home-wrapper">
