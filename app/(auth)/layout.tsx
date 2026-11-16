@@ -3,8 +3,16 @@ import Link from "next/link";
 import Image from "next/image";
 import 'flag-icons/css/flag-icons.min.css';
 import logo from '@/components/logo.png';
+import {Toaster} from "@/components/ui/sonner";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/betterAuth/auth";
 
-const Layout = ({children}: {children : React.ReactNode}) => {
+const Layout = async ({children}: {children : React.ReactNode}) => {
+    const session = await auth.api.getSession({headers: await headers()})
+
+    if(session?.user) redirect('/')
+
     return (
         <main className="auth-layout">
             <section className="auth-left-section scrollbar-hide-default">
@@ -21,6 +29,7 @@ const Layout = ({children}: {children : React.ReactNode}) => {
 
                 <div className="py-6 lg:pb-8 flex-1">
                     {children}
+                    <Toaster />
                 </div>
             </section>
 
