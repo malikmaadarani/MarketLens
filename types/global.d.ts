@@ -1,5 +1,5 @@
 declare global{
-    interface SigninFormData{
+    interface SignInFormData{
         email: string;
         password: string;
     }
