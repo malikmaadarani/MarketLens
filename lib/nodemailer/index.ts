@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import path from "node:path";
 import { WELCOME_EMAIL_TEMPLATE } from "@/lib/nodemailer/templates";
 
 export const transporter =  nodemailer.createTransport({
@@ -20,6 +21,12 @@ export const sendWelcomeEmail = async ({email, name, intro}: WelcomeEmailData) =
             subject: 'Welcome to MarketLens -  your stock market toolkit is ready!',
             text: 'Thanks for joining MarketLens',
             html: htmlTemplate,
+            attachments: [{
+                filename: 'marketlens-logo.png',
+                path: path.join(process.cwd(), 'components', 'logo.png'),
+                cid: 'marketlens-logo@marketlens',
+                contentType: 'image/png',
+            }],
         }
 
         await transporter.sendMail(mailOptions);
