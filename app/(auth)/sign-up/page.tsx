@@ -33,19 +33,30 @@ const SignUp = () => {
         mode: 'onBlur',
     });
 
-    const onSubmit= async(data: SignUpFormData) => {
-        try{
-          const result = await signUpWithEmail(data);
-          if (result.success) router.push('/');
-        } 
-        
-        catch (e) {
-            console.error(e);
-            toast.error('Sign up failed', {
-                description: e instanceof Error ? e.message: 'Failed to create an account'
-            })
+    const onSubmit = async (data: SignUpFormData) => {
+    try {
+        const result = await signUpWithEmail(data);
+
+        if (result.success) {
+            router.push('/');
+            return;
         }
-    };
+
+        toast.error('Sign up failed', {
+            description: 'Unable to create your account. If you already registered, please sign in.',
+        });
+    } 
+    catch (e) {
+        console.error(e);
+
+        toast.error('Sign up failed', {
+            description:
+                e instanceof Error
+                    ? e.message
+                    : 'Failed to create an account.',
+        });
+    }
+    };;
 
     return (
         <>
