@@ -49,11 +49,8 @@ const SignUp = () => {
     catch (e) {
         console.error(e);
 
-        toast.error('Sign up failed', {
-            description:
-                e instanceof Error
-                    ? e.message
-                    : 'Failed to create an account.',
+       toast.error('Sign up failed', {
+            description: result.error,
         });
     }
     };;
