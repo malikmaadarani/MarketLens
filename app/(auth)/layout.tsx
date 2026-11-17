@@ -29,7 +29,7 @@ const Layout = async ({children}: {children : React.ReactNode}) => {
 
                 <div className="py-6 lg:pb-8 flex-1">
                     {children}
-                    <Toaster />
+                    <Toaster richColors position="top-right"/>
                 </div>
             </section>
 
