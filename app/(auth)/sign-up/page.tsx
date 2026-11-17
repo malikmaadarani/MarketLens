@@ -43,17 +43,17 @@ const SignUp = () => {
         }
 
         toast.error('Sign up failed', {
-            description: 'Unable to create your account. If you already registered, please sign in.',
+            description: result.error ?? 'Unable to create your account. Please try again.',
         });
     } 
     catch (e) {
         console.error(e);
 
        toast.error('Sign up failed', {
-            description: result.error,
+            description: 'Unable to create your account. Please try again.',
         });
     }
-    };;
+    };
 
     return (
         <>
